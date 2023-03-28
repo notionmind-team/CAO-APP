@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Order View{% endblock %}
+
+{% block pagetitle %}Order View{% endblock %}
+
+{% block breadcrumbs %}
+	{{ block.super }}
+	<li class="breadcrumb-item"><a href="{% url 'order_history' %}">Place Order</a></li>
+	<li class="breadcrumb-item active">Order View</li> 
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+<!-- Main content -->
+<section class="content">
+	<div class="container-fluid">
+
+			<div class="row">
+					<div class="col-12">
+					  <!-- Main content -->
+					  <div class="invoice p-3 mb-3">
+						<!-- title row -->
+						<div class="row">
+						  <div class="col-12">
+							<h4>
+							  {{object.store.name}}, {{object.store.address}}, {{object.store.city}}, {{object.store.state}} {{object.store.zipcode}}
+							  <small class="float-right">Date : {{object.createdAt}}</small>
+							</h4>
+						  </div>
+						  <!-- /.col -->
+						</div>
+						<!-- info row -->
+						<div class="row invoice-info">
+								
+							<div class="col-sm-6 invoice-col">
+									<br/>
+									<b>Category :</b> {{object.category.name}}<br/>
+									<b>Sub Category :</b> {{object.subcategory.name}}<br/><br/>
+                </div>
+                <!-- /.col -->
+              </div>
+						<!-- /.row -->
+		  
+						<!-- Table row -->
+						<div class="row">
+						  <div class="col-12 table-responsive">
+									<table class="table table-striped">
+										<thead>
+										<tr class="bg-primary">
+										<th>Image</th>
+										<th>SKU ID</th>
+										<th>SKU Name</th>
+										<th>Supplier</th>
+										{% if object.order_type == 'Custom' %}
+											<th class="text-center">Quantity</th>
+										{% else %}
+											<th class="text-center">Quantity required</th>
+											<th class="text-center">On Hand Quantity</th>
+											<th class="text-center">Order</th>
+										{% endif %}
+										</tr>
+										</thead>
+										<tbody>
+											{% for record in object.orederitem_set.all %}
+											<tr>
+												<td>
+													{% if record.item.image %}
+														<img class="product-image" src="{{record.item.image.url}}" style="width:50px; height:50px;">
+													{% else %}
+														<img class="product-image" src="{% static 'no-image.jpg' %}" style="width:50px; height:50px;">
+													{% endif %}
+												</td>
+												<td>{{record.item.sku}}</td>
+												<td>{{record.item.name}}</td>
+												<td>{% if record.item.supplier %}{{record.item.supplier}}{% else %}-{% endif %}</td>
+												{% if object.order_type == 'Custom' %}
+														<td class="text-center">{{record.order_quantity}}</td>
+												{% else %}
+													<td class="text-center">{{record.total_quantity}}</td>
+													<td class="text-center">{{record.on_hand_quanty}}</td>
+													<td class="text-center">{{record.order_quantity}}</td>
+												{% endif %}
+											</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+							</div>
+						  <!-- /.col -->
+						</div>
+						
+						<!-- this row will not appear when printing -->
+						<div class="row no-print">
+						  	<div class="col-12">
+								<a href="{% url 'order_history' %}" class="btn btn-default float-right" style="margin-right: 5px;">Back</a>
+							</div>
+						</div>
+					  </div>
+					  <!-- /.invoice -->
+					</div><!-- /.col -->
+				  </div><!-- /.row -->
+
+		
+	</div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+	  
+
+{% endblock  %}

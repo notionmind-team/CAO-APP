@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Items{% endblock %}
+
+{% block pagetitle %}Items{% endblock %}
+
+{% block breadcrumbs %}
+	{{ block.super }}
+	<li class="breadcrumb-item active">Items</li>
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<section class="content">
+	<div class="container-fluid">
+		{% if messages %}
+			{% for message in messages %}
+				{% if message.tags == 'error' %}
+				<div class="alert alert-danger">{{ message|safe }}</div><br/>
+				{% else%}
+				<div class="alert {% if message.tags %} alert-{{ message.tags }}{% endif %}">{{ message|safe }}</div><br/>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+
+		<div class="row">
+				<div class="col-12">
+		<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Filter</h3>
+				</div>
+				<!-- /.card-header -->
+				<div class="card-body">
+					<form role="form" method="POST" id="filter_item_form">
+					{% csrf_token %}
+					<div class="row">
+						<div class="col-sm-3">
+							<!-- select -->
+							<div class="form-group">
+								<label>Search</label>
+								<input type="text" name="search" id="search" class="form-control" placeholder="Search by SKU ID and Name" value="{% if item_Post.search%}{{item_Post.search}}{% endif %}">
+							</div>
+						</div>
+
+						<div class="col-sm-4">
+							<!-- select -->
+							<div class="form-group">
+								<label>Category</label>
+								<select class="custom-select" name="category" id="id_category">
+								<option value="">-- Select Category --</option>
+								{% for cat in categories%}
+									<option value="{{cat.id}}" {% if item_Post.category|slugify == cat.id|slugify %} selected {% endif %}>{{cat.name}}</option>
+								{% endfor %}
+								
+								</select>
+							</div>
+						</div>
+						<div class="col-sm-3">
+						<div class="form-group">
+							<label>Sub Category</label>
+							<select class="custom-select" name="subcategory" id="id_subcategory">
+							<option value="">-- Select Sub Category --</option>
+							{% for sub in subcategories %}
+								<option value="{{sub.id}}" {% if item_Post.subcategory|slugify == sub.id|slugify %} selected {% endif %}>{{sub.name}}</option>
+							{% endfor %}
+							</select>
+						</div>
+						</div>
+					<div class="col-sm-2">
+						<div class="form-group" style="margin-top:30px;">
+							<button type="button" class="btn btn-info" onclick="ItemFormSeach('search');">Search</button>
+							<button type="button" class="btn btn-default" onclick="ItemFormSeach('clear');">Clear</button>
+							<input type="hidden" name="search_action" id="search_action" value="search">
+						</div>
+					</div>
+					</div>
+				</form>
+				</div>
+				<!-- /.card-body -->
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+					<div class="card-header">
+						<h3 class="card-title">Item Listing</h3> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<div class="btn-group" id="action_btn" style="display:none">
+							<button type="button" class="btn btn-default">Action</button>
+							<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+							</button>
+							<ul class="dropdown-menu">
+								<li><a class="dropdown-item"  href="javascript:ActionForm('delete')">Delete Selected Items</a></li>
+							</ul>
+						</div>
+						<div class="card-tools">
+			 				<a href="{% url 'item_new' %}" class="btn btn-block btn-primary"><i class="fas fa-plus"></i> &nbsp Add New Item</a>
+						</div>
+					</div>
+					<!-- /.card-header -->
+					{% if object_list %}
+					<div class="card-body table-responsive">
+						<form method="POST" id="form_list" action="{% url 'change_item_status' %}">
+							{% csrf_token %}
+							<table id="item_list" class="table table-bordered table-striped">
+								<thead>
+								<tr class="bg-primary">
+									<th class="text-center"><input type="checkbox" name="chk_all" id="chk_all" value="all"></th>
+									<th >Image</th>
+									<th class="text-center">
+										{% if order_by == 'sku' %}
+											{% if direction == 'asc' %}
+												<a href="?order_by=sku&direction=desc" style="color:aliceblue">SKU ID &nbsp;&nbsp;<i class='fas fa-arrow-up'></i></a>
+											{% else %}
+												<a href="?order_by=sku&direction=asc" style="color:aliceblue">SKU ID &nbsp;&nbsp;<i class='fas fa-arrow-down'></i></a>
+											{% endif %}
+										{% else %}
+											<a href="?order_by=sku&direction=asc" style="color:aliceblue">SKU ID</a>
+										{% endif %}
+									</th>
+									<th class="text-center">
+										{% if order_by == 'name' %}
+											{% if direction == 'asc' %}
+												<a href="?order_by=name&direction=desc" style="color:aliceblue">SKU Name &nbsp;&nbsp;<i class='fas fa-arrow-up'></i></a>
+											{% else %}
+												<a href="?order_by=name&direction=asc" style="color:aliceblue">SKU Name &nbsp;&nbsp;<i class='fas fa-arrow-down'></i></a>
+											{% endif %}
+										{% else %}
+											<a href="?order_by=name&direction=asc" style="color:aliceblue">SKU Name</a>
+										{% endif %}
+									</th>
+
+									<th class="text-center">
+										{% if order_by == 'price' %}
+											{% if direction == 'asc' %}
+												<a href="?order_by=price&direction=desc" style="color:aliceblue">Unit Price &nbsp;&nbsp;<i class='fas fa-arrow-up'></i></a>
+											{% else %}
+												<a href="?order_by=price&direction=asc" style="color:aliceblue">Unit Price &nbsp;&nbsp;<i class='fas fa-arrow-down'></i></a>
+											{% endif %}
+										{% else %}
+											<a href="?order_by=price&direction=asc" style="color:aliceblue">Unit Price</a>
+										{% endif %}
+									</th>
+
+									<th class="text-center">
+										{% if order_by == 'moq' %}
+											{% if direction == 'asc' %}
+												<a href="?order_by=moq&direction=desc" style="color:aliceblue">MOQ &nbsp;&nbsp;<i class='fas fa-arrow-up'></i></a>
+											{% else %}
+												<a href="?order_by=moq&direction=asc" style="color:aliceblue">MOQ &nbsp;&nbsp;<i class='fas fa-arrow-down'></i></a>
+											{% endif %}
+										{% else %}
+											<a href="?order_by=moq&direction=asc" style="color:aliceblue">MOQ</a>
+										{% endif %}
+									</th>
+
+									<th class="text-center">
+										{% if order_by == 'uom' %}
+											{% if direction == 'asc' %}
+												<a href="?order_by=uom&direction=desc" style="color:aliceblue">UOM &nbsp;&nbsp;<i class='fas fa-arrow-up'></i></a>
+											{% else %}
+												<a href="?order_by=uom&direction=asc" style="color:aliceblue">UOM &nbsp;&nbsp;<i class='fas fa-arrow-down'></i></a>
+											{% endif %}
+										{% else %}
+											<a href="?order_by=uom&direction=asc" style="color:aliceblue">UOM</a>
+										{% endif %}
+									</th>
+									
+									<th class="text-center">
+										{% if order_by == 'category' %}
+											{% if direction == 'asc' %}
+												<a href="?order_by=category&direction=desc" style="color:aliceblue">Category &nbsp;&nbsp;<i class='fas fa-arrow-up'></i></a>
+											{% else %}
+												<a href="?order_by=category&direction=asc" style="color:aliceblue">Category &nbsp;&nbsp;<i class='fas fa-arrow-down'></i></a>
+											{% endif %}
+										{% else %}
+											<a href="?order_by=category&direction=asc" style="color:aliceblue">Category</a>
+										{% endif %}
+									</th>
+
+									<th class="text-center">
+										{% if order_by == 'subcategory' %}
+											{% if direction == 'asc' %}
+												<a href="?order_by=subcategory&direction=desc" style="color:aliceblue">Sub Category &nbsp;&nbsp;<i class='fas fa-arrow-up'></i></a>
+											{% else %}
+												<a href="?order_by=subcategory&direction=asc" style="color:aliceblue">Sub Category &nbsp;&nbsp;<i class='fas fa-arrow-down'></i></a>
+											{% endif %}
+										{% else %}
+											<a href="?order_by=subcategory&direction=asc" style="color:aliceblue">Sub Category</a>
+										{% endif %}
+									</th>
+									<th class="text-center">
+										{% if order_by == 'supplier' %}
+											{% if direction == 'asc' %}
+												<a href="?order_by=supplier&direction=desc" style="color:aliceblue">Supplier &nbsp;&nbsp;<i class='fas fa-arrow-up'></i></a>
+											{% else %}
+												<a href="?order_by=supplier&direction=asc" style="color:aliceblue">Supplier &nbsp;&nbsp;<i class='fas fa-arrow-down'></i></a>
+											{% endif %}
+										{% else %}
+											<a href="?order_by=supplier&direction=asc" style="color:aliceblue">Supplier</a>
+										{% endif %}
+									</th>
+									<th class="text-center">Action</th>
+								</tr>
+								</thead>
+								<tbody>
+									{% for item in object_list %}
+										<tr>
+											<td class="text-center">
+												<input type="checkbox" id="id_{{item.token}}" name="records" class="chk" value="{{item.token}}">
+											</td>
+											<td>
+												{% if item.image %}
+													<img class="product-image" src="{{item.image.url}}" style="width:50px; height:50px;">
+												{% else %}
+													<img class="product-image" src="{% static 'no-image.jpg' %}" style="width:50px; height:50px;">
+												{% endif %}
+											</td>
+											<td class="text-center">{{item.sku}}</td>
+											<td class="text-center">{{item.name}}</td>
+											<td class="text-center">{{item.price}}</td>
+											<td class="text-center">{{item.moq}}</td>
+											<td class="text-center">{{item.get_uom_display}}</td>
+											<td class="text-center">{{item.category}}</td>
+											<td class="text-center">{{item.subcategory}}</td>
+											<td class="text-center">{% if item.supplier %}{{item.supplier}}{% else %}-{% endif %}</td>
+											<td class="text-center">
+												<a href="{% url 'item_view' item.token %}" class="btn btn-sm btn-secondary" title="View"><i class="fas fa-eye"></i> View</a>
+												<a href="{% url 'item_edit' item.token %}" class="btn btn-sm btn-info" title="Edit"><i class="fas fa-pencil-alt"></i> Edit</a>
+												<a href="{% url 'item_delete' item.token %}" class="btn btn-sm btn-danger" title="Delete"><i class="fas fa-trash"></i> Delete</a>
+											</td>
+										</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+							<input type="hidden" name="action_on" id="action_on">
+						</form>
+					</div>
+					<!-- /.card-body -->
+					<div class="card-footer clearfix">
+
+							{% if object_list.has_other_pages %}
+							<ul class="pagination pagination-sm m-0 float-right">
+								{% if object_list.has_previous %}
+								<li class="page-item"><a class="page-link" href="?order_by={{order_by}}&direction={{direction}}&page={{ object_list.previous_page_number }}">&laquo;</a></li>
+								{% else %}
+								<li class="page-item disabled"><a class="page-link" href="#">&laquo;</a></li>
+								{% endif %}
+								{% for i in object_list.paginator.page_range %}
+								{% if object_list.number == i %}
+									<li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+								{% else %}
+									<li class="page-item"><a class="page-link" href="?order_by={{order_by}}&direction={{direction}}&page={{ i }}">{{ i }}</a></li>
+								{% endif %}
+								{% endfor %}
+								{% if object_list.has_next %}
+								<li class="page-item"><a class="page-link" href="?order_by={{order_by}}&direction={{direction}}&page={{ object_list.next_page_number }}">&raquo;</a></li>
+								{% else %}
+								<li class="page-item disabled"><a class="page-link" href="#">&raquo;</a></li>
+								{% endif %}
+							</ul>
+							{% endif %}
+					</div>
+					{% else %}
+						<div class="card-body">
+							<div class="alert alert-danger">Item(s) not found</div>
+						</div>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+{% endblock  %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Create Adhoc Order{% endblock %}
+
+{% block pagetitle %}Create Adhoc Order{% endblock %}
+
+{% block breadcrumbs %}
+	{{ block.super }}
+	<li class="breadcrumb-item"><a href="{% url 'order_history' %}">Place Order</a></li>
+	<li class="breadcrumb-item active">Create Adhoc Order</li> 
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+<!-- Main content -->
+<section class="content">
+	<div class="container-fluid">
+
+		{% if messages %}
+			{% for message in messages %}
+				{% if message.tags == 'error' %}
+				<div class="alert alert-danger">{{ message|safe }}</div><br/>
+				{% else%}
+				<div class="alert {% if message.tags %} alert-{{ message.tags }}{% endif %}">{{ message|safe }}</div><br/>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+		
+		<div class="row">
+			<div class="col-12">
+			<div class="card">
+			<div class="card-header">
+				<h3 class="card-title">Filter</h3>
+				<div class="card-tools">
+					<button type="button" class="btn btn-tool btn-sm" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+					  <i class="fas fa-minus"></i></button>
+				</div>
+			</div>
+			<!-- /.card-header -->
+			<div class="card-body">
+				<form role="form" method="POST" id="filter_item_form">
+				{% csrf_token %}
+				<div class="row">
+					
+					<div class="col-sm-5">
+						<!-- select -->
+						<div class="form-group">
+							<label>Category</label>
+							<select class="custom-select" name="category" id="id_category">
+							<option value="">-- Select Category --</option>
+							{% for cat in categories%}
+								<option value="{{cat.id}}" {% if Order_Post.category|slugify == cat.id|slugify %} selected {% endif %}>{{cat.name}}</option>
+							{% endfor %}
+							
+							</select>
+						</div>
+					</div>
+					<div class="col-sm-5">
+					<div class="form-group">
+						<label>Sub Category</label>
+						<select class="custom-select" name="subcategory" id="id_subcategory">
+						<option value="">-- Select Sub Category --</option>
+						{% for sub in subcategories %}
+							<option value="{{sub.id}}" {% if Order_Post.subcategory|slugify == sub.id|slugify %} selected {% endif %}>{{sub.name}}</option>
+						{% endfor %}
+						</select>
+					</div>
+					</div>
+				<div class="col-sm-2">
+					<div class="form-group" style="margin-top:30px;">
+						<button type="button" class="btn btn-info" onclick="ItemFormSeach('search');">Search</button>
+						<button type="button" class="btn btn-default" onclick="ItemFormSeach('clear');">Clear</button>
+						<input type="hidden" name="search_action" id="search_action" value="search">
+					</div>
+				</div>
+				</div>
+			</form>
+			</div>
+			<!-- /.card-body -->
+			</div>
+		</div>
+		</div>
+
+		{% if object %}
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+				<!-- /.card-header -->
+				<div class="card-body table-responsive p-0" style="height: 600px;">
+					<form method="POST" id="order_items_form" action="{% url 'order_add_new_preview' %}">
+						{% csrf_token %}
+						<table class="table table-bordered">
+							<thead>
+								<tr class="bg-primary">
+									<th class="text-center"><input type="checkbox" name="chk_all_oder_items" id="chk_all_oder_items" value="all"></th>
+									<th class="text-center">SKU ID</th>
+									<th class="text-center">SKU Name</th>
+									<th class="text-center">Supplier</th>
+									<th class="text-center">Quantity</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for item in object %}
+								<tr>
+									<td class="text-center">
+										{% if item.selected %}
+										 	<input type="checkbox" id="id_{{item.id}}" name="records" class="chk_order" value="{{item.id}}" checked>
+										{% else %}
+											<input type="checkbox" id="id_{{item.id}}" name="records" class="chk_order" value="{{item.id}}">
+										{% endif %}
+									</td>
+									<td class="text-center">{{item.sku}}</td>
+									<td class="text-center">{{item.name}}</td>
+									<td class="text-center">{% if item.supplier %}{{item.supplier}}{% else %}-{% endif %}</td>
+									<td class="text-center">
+										{% if item.selected %}
+											<input type="number" name="quantity_{{item.id}}" id="quantity_{{item.id}}" class="form-control" placeholder="Enter Quantity" value="{{item.quantity}}" required/>
+										{% else %}
+											<input type="number" name="quantity_{{item.id}}" id="quantity_{{item.id}}" class="form-control" placeholder="Enter Quantity" value="{{item.quantity}}" readonly/>
+										{% endif %}
+
+										<span class="error" id="quantity_error_{{item.id}}" style="color:red"></span>
+									</td>
+								</tr>
+								{% endfor %}
+							</tbody>
+							<tfoot>
+								<tr>
+									<td class="text-center" colspan="6">
+										{% if new_order_post %}
+											<button type="button" class="btn btn-info float-right" id="order_itm_btn">Submit</button>
+										{% else %}
+											<button type="button" class="btn btn-info float-right" id="order_itm_btn" style="display:none">Submit</button>
+										{% endif %}
+									</td>
+								</tr>
+							</tfoot>
+						</table>
+					</form>
+				</div>
+				<!-- /.card-body -->
+				</div>
+				<!-- /.card -->
+			</div>
+		</div>
+		{% else %}
+
+			{% if Order_Post %}
+
+				<div class="row">
+					<div class="col-12">
+						<div class="card">
+							<div class="card-body">
+								<div class="alert alert-danger">Items not found</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+			{% endif %}
+
+		{% endif %}
+
+	</div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+	  
+
+{% endblock  %}

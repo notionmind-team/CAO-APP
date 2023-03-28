@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Sales Data{% endblock %}
+
+{% block pagetitle %}Add New Sales Data{% endblock %}
+
+{% block breadcrumbs %}
+	{{ block.super }}
+    <li class="breadcrumb-item"><a href="{% url 'sales_list' %}">Sales Data Listing</a></li>
+    <li class="breadcrumb-item active">Add New Sales Data</li>
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+<section class="content">
+
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+            <div class="alert alert-danger">{{ message|safe }}</div><br/>
+            {% else%}
+            <div class="alert {% if message.tags %} alert-{{ message.tags }}{% endif %}">{{ message|safe }}</div><br/>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-default">
+                <div class="card-header">
+                    <h3 class="card-title">Sales Data Information</h3>
+                </div>
+                <!-- /.card-header -->
+                <!-- form start -->
+                <form class="form-horizontal" method="POST" enctype="multipart/form-data">
+                    <div class="card-body">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <h4>Please fix the following errors</h4>
+                                <ul>
+                                {% for field in form %}
+                                    {% if field.errors %}
+                                        {% for error in field.errors %}
+                                            <li><a href="#id_{{ field.name }}" class="error">{{ error|escape }}</a></li>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                                </ul>
+                                {% if form.non_field_errors %}
+                                    {{ form.non_field_errors }}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        
+                        {% for field in form.visible_fields %}
+
+                            <div class="form-group row">
+                                <label for="id_{{ field.name }}" class="col-sm-2 col-form-label">{{ field.label|upper }} {% if field.field.required %}<span class="required">*</span>{% endif %} </label>
+                                <div class="col-sm-10">
+                                    {{ field }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% for hidden_field in form.hidden_fields %}
+                        {{ hidden_field }}
+                    {% endfor %}
+                    <!-- /.card-body -->
+                    <div class="card-footer">
+                        <input type="submit" value="Save" class="btn btn-info" name="save">
+                        <a href="{% url 'sales_list' %}" class="btn btn-default">Cancel</a>
+                    </div>
+                    <!-- /.card-footer -->
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock  %}

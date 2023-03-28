@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm Sales Data{% endblock %}
+
+{% block pagetitle %}Confirm Sales Data{% endblock %}
+
+{% block breadcrumbs %}
+	{{ block.super }}
+    <li class="breadcrumb-item"><a href="{% url 'sales_list' %}">Sales Data Listing</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'sales_import_upload' %}">Sales Data Import</a></li>
+    <li class="breadcrumb-item active">Confirm Sales Data</li>
+    
+{% endblock %}
+
+
+{% load static %}
+
+{% block content %}
+
+<section class="content">
+
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                <div class="alert alert-danger">{{ message|safe }}</div><br/>
+                {% else%}
+                <div class="alert {% if message.tags %} alert-{{ message.tags }}{% endif %}">{{ message|safe }}</div><br/>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        
+        {% if header_message %}
+            {% for message in header_message %}
+                <div class="alert alert-danger">{{ message|safe }}</div><br/>
+            {% endfor %}
+        {% endif %}
+
+        {% if header_is_valid %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">Sales Data List</h3>
+                    </div>
+                    <form class="form-horizontal" method="POST" id="import-form">
+                        {% csrf_token %}
+                        <!-- /.card-body -->
+                        <div class="card-body table-responsive" id="import-user-list">
+                                <table class="table card-table">
+                                  <thead>
+                                    <tr class="bg-primary">
+                                        <th><input type="checkbox" name="chkall" id="chk_all"></th>
+                                        <th >SKU_ID</th>
+                                        <th >SKU_NAME</th>
+                                        <th class="text-center">QUANTITY</th>
+                                        <th class="text-center">UPDATED ON</th>
+                                        <th class="text-center">Status</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {% for r in records %}
+                                      <tr {% if r.status == 'error' %} class="table-danger" {% endif %} >
+                                          {% if r.status == 'error' %}
+                                            <td>-</td>
+                                          {% else %}
+                                          <td>
+                                              <input type="checkbox" class="chk" name="ids" value="{{r.id}}">
+                                          </td>
+                                          {% endif %}
+                                          <td>{{r.sku_id}}</td>
+                                          <td>{{r.sku_name}}</td>
+                                          <td class="text-center">{{r.qnty}}</td>
+                                          <td class="text-center">{{ r.updatedon|date:'Y-m-d' }} </td>
+                                          <td class="text-center">{{r.msg}}</td>
+                                      </tr>
+                                    {% endfor %}
+                                  </tbody>
+                                </table>
+                              </div>
+                        <div class="card-footer">
+                            <input type="button" value="Import" class="btn btn-info" name="save" id="import-btn">
+                            <a href="{% url 'sales_list' %}" class="btn btn-default">Cancel</a>
+                        </div>
+                        <!-- /.card-footer -->
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+{% endblock  %}

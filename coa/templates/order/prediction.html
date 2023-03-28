@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Order{% endblock %}
+
+{% block pagetitle %}Generate Order{% endblock %}
+
+{% block breadcrumbs %}
+	{{ block.super }}
+	<li class="breadcrumb-item active">Generate Order</li>
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+<!-- Main content -->
+<section class="content">
+	<div class="container-fluid">
+
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+					<div class="card-header">
+						<h3 class="card-title">Filter</h3>
+					</div>
+					<!-- /.card-header -->
+					<div class="card-body">
+						<form role="form" method="POST" id="filter_item_form">
+						{% csrf_token %}
+						<div class="row">
+							
+							<div class="col-sm-5">
+								<!-- select -->
+								<div class="form-group">
+									<label>Category</label>
+									<select class="custom-select" name="category" id="id_category">
+									<option value="">-- Select Category --</option>
+									{% for cat in categories%}
+										<option value="{{cat.id}}" {% if prediction_Post.category|slugify == cat.id|slugify %} selected {% endif %}>{{cat.name}}</option>
+									{% endfor %}
+									
+									</select>
+								</div>
+							</div>
+							<div class="col-sm-5">
+							<div class="form-group">
+								<label>Sub Category</label>
+								<select class="custom-select" name="subcategory" id="id_subcategory">
+								<option value="">-- Select Sub Category --</option>
+								{% for sub in subcategories %}
+									<option value="{{sub.id}}" {% if prediction_Post.subcategory|slugify == sub.id|slugify %} selected {% endif %}>{{sub.name}}</option>
+								{% endfor %}
+								</select>
+							</div>
+							</div>
+						<div class="col-sm-2">
+							<div class="form-group" style="margin-top:30px;">
+								<button type="button" class="btn btn-info" onclick="ItemFormSeach('search');">Search</button>
+								<button type="button" class="btn btn-default" onclick="ItemFormSeach('clear');">Clear</button>
+								<input type="hidden" name="search_action" id="search_action" value="search">
+							</div>
+						</div>
+						</div>
+						</form>
+					</div>
+					<!-- /.card-body -->
+					</div>
+				</div>
+		</div>
+
+		{% if object %}
+		
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+				<!-- /.card-header -->
+				<div class="card-body table-responsive p-0" style="height: 600px;">
+					<form method="POST" action="{% url 'order_preview'%}" id="pre_place_order_form">
+						{% csrf_token %}
+						<table class="table table-bordered">
+						<thead>
+							<tr class="bg-primary">
+								<th colspan="2">{{sub_cat_info.category.name}}</th>
+								<th class="text-center" colspan="3">Monday order (Wed delivery)</th>
+								<th class="text-center" colspan="3">Friday order (Sat delivery)</th>
+							</tr>
+							<tr class="bg-primary">
+								<th colspan="2">{{sub_cat_info.name}}</th>
+								<th class="text-center">Quantity required</th>
+								<th class="text-center">On Hand Quantity</th>
+								<th class="text-center">Order</th>
+								<th class="text-center">Quantity required</th>
+								<th class="text-center">On Hand Quantity</th>
+								<th class="text-center">Order</th>
+							</tr>
+							<tr class="bg-primary">
+								<th >Image</th>
+								<th>SKU</th>
+								<th class="text-center" colspan="3"></th>
+								<th class="text-center" colspan="3"></th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for record in object.items %}
+							<tr>
+								<td>
+									{% if record.item.image %}
+										<img class="product-image" src="{{record.item.image.url}}" style="width:50px; height:50px;">
+									{% else %}
+										<img class="product-image" src="{% static 'no-image.jpg' %}" style="width:50px; height:50px;">
+									{% endif %}
+								</td>
+								<td>
+									{{record.item.name}}
+									<input type="hidden" id="id_{{record.id}}" name="records" class="chk" value="{{record.id}}">
+								</td>
+
+								
+								<td class="text-center">
+									{{record.mon_quantity|floatformat}}
+									<input type="hidden" id="mon_order_quantity_{{record.id}}" name="mon_order_quantity_{{record.id}}" value="{{record.mon_quantity|floatformat}}">
+								</td>
+								<td class="text-center">
+									<input type="number" min="0" oninput="validity.valid||(value='');" class="form-control mon_class" placeholder="On Hand Quantity" id="mon_on_hand_quanty_{{record.id}}" name="mon_on_hand_quanty_{{record.id}}" value="{% if record.mon_on_hand %}{{record.mon_on_hand}}{% endif %}" {% if activate_day != 'mon'%} disabled {% endif %}>
+									<span id="mon_moq_error_{{record.id}}" class="error" style="width: 100%;margin-top: .25rem;font-size: 80%;color: #dc3545;"></span>
+
+								</td>
+								<td class="text-center">
+									<span id="mon_order_txt_{{record.id}}">{% if record.mon_on_order %}{{record.mon_on_order}}{% else %}0{% endif %}</span>
+									<input type="hidden" id="mon_order_valid_{{record.id}}" name="mon_order_valid_{{record.id}}" value="{% if record.mon_on_order %}yes{% else %}no{% endif %}">
+									<input type="hidden" id="mon_order_{{record.id}}" name="mon_order_{{record.id}}" value="{% if record.mon_on_order %}{{record.mon_on_order}}{% endif %}">
+									<input type="hidden" id="mon_moq_{{record.id}}" name="mon_moq_{{record.id}}" value="{{record.item.moq}}">
+								</td>
+
+
+								<td class="text-center">
+									{{record.fri_quantity|floatformat}}
+									<input type="hidden" id="fri_order_quantity_{{record.id}}" name="fri_order_quantity_{{record.id}}" value="{{record.fri_quantity|floatformat}}">
+								</td>
+								<td class="text-center">
+									<input type="number" min="0" oninput="validity.valid||(value='');" class="form-control fri_class" placeholder="On Hand Quantity" id="fri_on_hand_quanty_{{record.id}}" name="fri_on_hand_quanty_{{record.id}}" value="{% if record.fri_on_hand %}{{record.fri_on_hand}}{% endif %}" {% if activate_day != 'fri'%} disabled {% endif %}>
+									<span id="fri_moq_error_{{record.id}}" class="error" style="width: 100%;margin-top: .25rem;font-size: 80%;color: #dc3545;"></span>
+								</td>
+								<td class="text-center">
+									<span id="fri_order_txt_{{record.id}}">{% if record.fri_on_order %}{{record.fri_on_order}}{% else %}0{% endif %}</span>
+									<input type="hidden" id="fri_order_{{record.id}}" name="fri_order_{{record.id}}" value="{% if record.fri_on_order %}{{record.fri_on_order}}{% endif %}">
+									<input type="hidden" id="fri_order_valid_{{record.id}}" name="fri_order_valid_{{record.id}}" value="{% if record.fri_on_order %}yes{% else %}no{% endif %}">
+									<input type="hidden" id="fri_moq_{{record.id}}" name="fri_moq_{{record.id}}" value="{{record.item.moq}}">
+								</td>
+								
+							</tr>
+							{% endfor %}
+						</tbody>
+						</table>
+						<input type="hidden" name="activate_day" id="activate_day" value="{{activate_day}}">
+						<input type="hidden" name="weeklysales" id="weeklysales" value="{{object.id}}">
+					</form>
+				</div>
+				<!-- /.card-body -->
+				<div class="card-footer clearfix">
+					{% if activate_day == 'mon' or activate_day == 'fri'%}
+						{% if preview_order_post.items %}
+							<button type="button" class="btn btn-info float-right" id="pre_place_order">Submit</button>
+							<a href="{% url 'order_clear' %}" class="btn btn-default float-right" style="margin-right: 5px;">Clear</a>
+						{% else %}
+							<button type="button" class="btn btn-info float-right" id="pre_place_order">Submit</button>
+						{% endif %}
+					{% endif %}
+				</div>
+
+				</div>
+				<!-- /.card -->
+			</div>
+		</div>
+
+		{% else %}
+				
+		{% if prediction_Post %}
+
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-body">
+									<div class="alert alert-danger">Data not found</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				{% endif %}
+
+		{% endif %}
+		
+
+	</div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+	  
+
+{% endblock  %}

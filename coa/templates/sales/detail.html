@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}View Sales Data{% endblock %}
+
+{% block pagetitle %}View Sales Data{% endblock %}
+
+{% block breadcrumbs %}
+	{{ block.super }}
+    <li class="breadcrumb-item"><a href="{% url 'sales_list' %}">Sales Data Listing</a></li>
+    <li class="breadcrumb-item active">View Sales Data</li>
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+<!-- Main content -->
+<section class="content">
+
+    <!-- Default box -->
+    <div class="card card-solid">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12 col-sm-6">
+            <h3 class="my-3">{{object.item.name}}</h3>
+            <hr>
+            
+            <h4>SKU ID</h4>
+            <p>{{object.item.sku}}</p>
+
+            <h4>Quantity</h4>
+            <p>{{object.quantity}}</p>
+
+            <h4>Revenue</h4>
+            <p>{{object.revenue}}</p>
+
+            <h4>Updated On</h4>
+            <p>{{object.updatedOn}}</p>
+
+          </div>
+        </div>
+      </div>
+      <!-- /.card-body -->
+    </div>
+    <!-- /.card -->
+
+  </section>
+{% endblock  %}

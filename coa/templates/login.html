@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Login | XENA Panel</title>
+  <!-- Tell the browser to be responsive to screen width -->
+  <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- icheck bootstrap -->
+  <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+  <!-- Google Font: Source Sans Pro -->
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+</head>
+<body class="hold-transition login-page">
+<div class="login-box">
+  <div class="login-logo">
+	<a href=""><b>XENA</b></a>
+  </div>
+	<!-- /.login-logo -->
+	<div class="card">
+
+		<div class="card-body login-card-body">
+			<p class="login-box-msg">Login to start your account</p>
+
+			<form method="post">
+				{% csrf_token %}
+
+				{% if messages %}
+					{% for message in messages %}
+						{% if message.tags == 'error' %}
+						<div class="alert alert-danger">{{ message|safe }}</div><br/>
+						{% else%}
+						<div class="alert {% if message.tags %} alert-{{ message.tags }}{% endif %}">{{ message|safe }}</div><br/>
+						{% endif %}
+					{% endfor %}
+				{% endif %}
+
+				{% if form.errors %}
+					<div class="alert alert-danger">
+						<h4>Please fix the following errors</h4>
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+								{% for error in field.errors %}
+									<li><a href="#id_{{ field.name }}" class="error">{{ field.name }} - {{ error|escape }}</a></li>
+								{% endfor %}
+							{% endif %}
+						{% endfor %}
+						</ul>
+						{% if form.non_field_errors %}
+							{{ form.non_field_errors }}
+						{% endif %}
+					</div>
+				{% endif %}
+				
+				{% for field in form.visible_fields %}
+					<div class="input-group mb-3">
+						<input id="id_{{ field.name }}" type="{{ field.field.widget.input_type }}" name="{{ field.name }}" class="form-control" value="{{ field.value|default_if_none:'' }}" placeholder="{{ field.field.widget.attrs.placeholder }}" required />
+						{% if field.name == 'password' %}
+							<div class="input-group-append">
+								<div class="input-group-text">
+									<span class="fas fa-lock"></span>
+								</div>
+							</div>
+						{% else %}
+							<div class="input-group-append">
+								<div class="input-group-text">
+									<span class="fas fa-envelope"></span>
+								</div>
+							</div>
+						{% endif %}
+					</div>
+				{% endfor %}
+				
+				{% for hidden_field in form.hidden_fields %}
+					{{ hidden_field }}
+				{% endfor %}		
+
+				<div class="row">
+					<!-- /.col -->
+					<div class="col-12">
+					  <button type="submit" class="btn btn-primary btn-block">Login</button>
+					</div>
+					<!-- /.col -->
+				  </div>
+			</form>
+		</div>
+		<!-- /.login-card-body -->
+	</div>
+ 
+</div>
+<!-- /.login-box -->
+
+<!-- jQuery -->
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+
+</body>
+</html>

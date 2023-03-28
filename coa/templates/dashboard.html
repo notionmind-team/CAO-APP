@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block pagetitle %}Dashboard{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<!-- Main content -->
+<div class="content">
+	<div class="container-fluid">
+
+		{% if charts%}
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="callout callout-info">
+				<h5><i class="fas fa-info"></i> Note:</h5>
+					Last Generate Sales Prediction Data on <b>{{charts.createdAt}}</b>
+				</div>
+			</div>
+		</div>
+		{% endif %}
+
+		{% if charts and charts.chart1.summary1.value %}
+		<div class="row">
+			<div class="col-lg-6">
+				{% if charts.chart1.summary1.value %}
+				<div class="card">
+					<div class="card-header border-0">
+						<div class="d-flex justify-content-between">
+							<h3 class="card-title">{{charts.chart1.title}}</h3>
+						</div>
+					</div>
+					<div class="card-body">
+						<div class="d-flex">
+							<p class="d-flex flex-column">
+								<span class="text-bold text-lg">{{charts.chart1.summary1.value|floatformat}}</span>
+								<span>{{charts.chart1.summary1.text}}</span>
+							</p>
+							<p class="ml-auto d-flex flex-column text-right">
+								{% if charts.chart1.summary2.value < 0%}
+									<span class="text-danger"> <i class="fas fa-arrow-down"></i> {{charts.chart1.summary2.value|floatformat:2}}%</span>
+								{% else %} 
+								<span class="text-success"> <i class="fas fa-arrow-up"></i> {{charts.chart1.summary2.value|floatformat:2}}%</span>
+								{% endif %}
+								<span class="text-muted">{{charts.chart1.summary2.text}}</span>
+							</p>
+						</div>
+						<!-- /.d-flex -->
+
+						<div class="position-relative mb-4">
+							<canvas id="total_sales_day_by_qunty" height="200"></canvas>
+						</div>
+
+						<div class="d-flex flex-row justify-content-end">
+							<span class="mr-2"><i class="fas fa-square text-primary"></i> {{charts.chart1.primary_text}}</span>
+							<span><i class="fas fa-square text-gray"></i> {{charts.chart1.secondary_text}}</span>
+						</div>
+					</div>
+				</div>
+				<!-- /.card -->
+				{% endif %}
+
+				{% if charts.chart3.data %}
+				<div class="card">
+					<div class="card-header border-0">
+						<h3 class="card-title">{{charts.chart3.title}}</h3>
+					</div>
+					<div class="card-body table-responsive p-0" style="height: 500px;">
+						<table class="table table-striped table-valign-middle">
+							<thead>
+							<tr class="bg-primary">
+								<th>Item</th>
+								<th>Sales</th>
+								<th>Different</th>
+								<th>Quantity</th>
+							</tr>
+							</thead>
+							<tbody>
+							{% for item in charts.chart3.data %}
+								<tr>
+									<td>
+										{% if item.5 %}
+											<img class="img-circle img-size-32 mr-2" src="{{item.5}}" style="width:32px; height:20px">
+										{% else %}
+											<img class="img-circle img-size-32 mr-2" src="{% static 'no-image.jpg' %}">
+										{% endif %}
+										{{item.1}}
+									</td>
+									<td>${{item.2|floatformat:2}} USD</td>
+									<td>
+										{% if item.4 < 0%}
+											<small class="text-danger mr-1"><i class="fas fa-arrow-down"></i>{{item.4|floatformat:2}}%</small>
+										{% else %} 
+										<small class="text-success mr-1"><i class="fas fa-arrow-up"></i>{{item.4|floatformat:2}}%</small>
+										{% endif %}
+									</td>
+									<td>
+										{{item.3|floatformat}} Sold
+									</td>
+
+								</tr>
+							{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<!-- /.card -->
+				{% endif %}
+				
+			</div>
+			<!-- /.col-md-6 -->
+			
+			<div class="col-lg-6">
+				{% if charts.chart2.summary1.value %}
+				<div class="card">
+					<div class="card-header border-0">
+						<div class="d-flex justify-content-between">
+							<h3 class="card-title">{{charts.chart2.title}}</h3>
+						</div>
+					</div>
+					<div class="card-body">
+						<div class="d-flex">
+							<p class="d-flex flex-column">
+								<span class="text-bold text-lg">${{charts.chart2.summary1.value|floatformat:2}}</span>
+								<span>{{charts.chart2.summary1.text}}</span>
+							</p>
+							<p class="ml-auto d-flex flex-column text-right">
+								{% if charts.chart2.summary2.value < 0%}
+									<span class="text-danger"> <i class="fas fa-arrow-down"></i> {{charts.chart2.summary2.value|floatformat:2}}%</span>
+								{% else %} 
+									<span class="text-success"> <i class="fas fa-arrow-up"></i> {{charts.chart2.summary2.value|floatformat:2}}%</span>
+								{% endif %}
+								<span class="text-muted">{{charts.chart2.summary2.text}}</span>
+							</p>
+						</div>
+						<!-- /.d-flex -->
+
+						<div class="position-relative mb-4">
+							<canvas id="total_sales_day_by_price" height="200"></canvas>
+						</div>
+
+						<div class="d-flex flex-row justify-content-end">
+							<span class="mr-2"><i class="fas fa-square text-primary"></i> {{charts.chart2.primary_text}}</span>
+							<span><i class="fas fa-square text-gray"></i> {{charts.chart2.secondary_text}}</span>
+						</div>
+					</div>
+				</div>
+				<!-- /.card -->
+				{% endif %}
+
+				{% if charts.chart4.data %}
+				<div class="card">
+					<div class="card-header border-0">
+						
+						<div class="card-tools">
+							<select class="form-control" onchange="changeChart('{{store.token}}',this.value)">
+								<option value="1">Item Wise (%) of Sales</option>
+								<option value="2">Category Wise (%) of Sales</option>
+								<option value="3">Sub-Category Wise (%) of Sales</option>
+							</select>
+						</div>
+
+					</div>
+					<div class="card-body">
+							<canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+					</div>
+				</div>
+				{% endif %}
+
+			</div>
+			
+			<!-- /.col-md-6 -->
+		</div>
+		{% else %}
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="card">
+					<div class="card-body">
+						<div class="alert alert-info">Sales data not available</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		{% endif %}
+		<!-- /.row -->
+	</div>
+	<!-- /.container-fluid -->
+</div>
+<!-- /.content -->
+	  
+
+{% endblock  %}

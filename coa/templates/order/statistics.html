@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Weekly Sales Outlook{% endblock %}
+
+{% block pagetitle %}Weekly Sales Outlook{% endblock %}
+
+{% block breadcrumbs %}
+	{{ block.super }}
+	<li class="breadcrumb-item active">Weekly Sales Outlook</li> 
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+<!-- Main content -->
+<section class="content">
+	<div class="container-fluid">
+
+		{% if messages %}
+			{% for message in messages %}
+				{% if message.tags == 'error' %}
+				<div class="alert alert-danger">{{ message|safe }}</div><br/>
+				{% else%}
+				<div class="alert {% if message.tags %} alert-{{ message.tags }}{% endif %}">{{ message|safe }}</div><br/>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+		
+
+		<div class="row">
+			<div class="col-12">
+	<div class="card">
+			<div class="card-header">
+				<h3 class="card-title">Generate Sales Prediction Data</h3>
+				<div class="card-tools">
+					<button type="button" class="btn btn-tool btn-sm" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+					  <i class="fas fa-minus"></i></button>
+				</div>
+			</div>
+			<!-- /.card-header -->
+			<div class="card-body">
+				<div class="row">
+					<div class="col-sm-5">
+						<div class="form-group">
+							<label>Model</label>
+							<select class="custom-select" name="model" id="id_model">
+								<option value="">-- Select Model --</option>
+								<option value="MA">Moving Average - MA</option>
+								<option value="ARIMA">Autoregressive Integrated Moving Average - ARIMA</option>
+								<option value="SARIMA">Seasonal Autoregressive Integrated Moving Average - SARIMA</option>
+								<option value="LSTM">Long Short Term Memory Network - LSTM</option>
+							</select>
+						</div>
+					</div>
+					<div class="col-sm-5">
+						<div class="form-group">
+							<label>Factors</label>
+							<div class="form-check">
+							  <input class="form-check-input" type="checkbox" id="factors_1">
+							  <label class="form-check-label" for="factors_1">Seasonal Factor</label>
+							</div>
+							<div class="form-check">
+							  <input class="form-check-input" type="checkbox" id="factors_2">
+							  <label class="form-check-label" for="factors_2">Weather Factor</label>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-2">
+						<div class="form-group" style="margin-top:30px;">
+							<a href="{% url 'generate_store_prediction_data' %}" class="btn btn-info">&nbsp Generate</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.card-body -->
+			</div>
+		</div>
+		</div>
+
+
+		{% if charts %}
+		<div class="alert alert-info"> <i class="fas fa-info"></i> Total Weekly Sales <b>${{charts.chart2.summary1.value|floatformat:2}}</b></div>
+		{% endif %}
+
+		<div class="row">
+			<div class="col-12">
+	<div class="card">
+			<div class="card-header">
+				<h3 class="card-title">Filter</h3>
+				<div class="card-tools">
+					<button type="button" class="btn btn-tool btn-sm" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+					  <i class="fas fa-minus"></i></button>
+				</div>
+			</div>
+			<!-- /.card-header -->
+			<div class="card-body">
+				<form role="form" method="POST" id="filter_item_form">
+				{% csrf_token %}
+				<div class="row">
+					
+					<div class="col-sm-5">
+						<!-- select -->
+						<div class="form-group">
+							<label>Category</label>
+							<select class="custom-select" name="category" id="id_category">
+							<option value="">-- Select Category --</option>
+							{% for cat in categories%}
+								<option value="{{cat.id}}" {% if statistics_Post.category|slugify == cat.id|slugify %} selected {% endif %}>{{cat.name}}</option>
+							{% endfor %}
+							
+							</select>
+						</div>
+					</div>
+					<div class="col-sm-5">
+					<div class="form-group">
+						<label>Sub Category</label>
+						<select class="custom-select" name="subcategory" id="id_subcategory">
+						<option value="">-- Select Sub Category --</option>
+						{% for sub in subcategories %}
+							<option value="{{sub.id}}" {% if statistics_Post.subcategory|slugify == sub.id|slugify %} selected {% endif %}>{{sub.name}}</option>
+						{% endfor %}
+						</select>
+					</div>
+					</div>
+				<div class="col-sm-2">
+					<div class="form-group" style="margin-top:30px;">
+						<button type="button" class="btn btn-info" onclick="ItemFormSeach('search');">Search</button>
+						<button type="button" class="btn btn-default" onclick="ItemFormSeach('clear');">Clear</button>
+						<input type="hidden" name="search_action" id="search_action" value="search">
+					</div>
+				</div>
+				</div>
+			</form>
+			</div>
+			<!-- /.card-body -->
+			</div>
+		</div>
+		</div>
+
+		{% if object %}
+
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+				<!-- /.card-header -->
+				<div class="card-body table-responsive p-0" style="height: 600px;">
+					<table class="table table-bordered">
+					<thead>
+						<tr class="bg-primary">
+							<th colspan="3">Category:{{sub_cat_info}}</th>
+							<th class="text-center">Wed</th>
+							<th class="text-center">Thu</th>
+							<th class="text-center">Fri</th>
+							<th class="text-center">Sat</th>
+							<th class="text-center">Sun</th>
+							<th class="text-center">Mon</th>
+							<th class="text-center">Tue</th>
+							<th></th>	
+						</tr>
+						<tr class="bg-primary">
+							<th>Average weekly sales</th>
+							<th>${{object.tot|floatformat:2}}</th>
+							<th></th>
+							<th class="text-center">${{object.wed|floatformat:2}}</th>
+							<th class="text-center">${{object.thu|floatformat:2}}</th>
+							<th class="text-center">${{object.fri|floatformat:2}}</th>
+							<th class="text-center">${{object.sat|floatformat:2}}</th>
+							<th class="text-center">${{object.sun|floatformat:2}}</th>
+							<th class="text-center">${{object.mon|floatformat:2}}</th>
+							<th class="text-center">${{object.tue|floatformat:2}}</th>
+							<th class="text-center">${{object.tot|floatformat:2}}</th>
+						</tr>
+						<tr class="bg-primary">
+							<th>SKU</th>
+							<th class="text-center">Avg movement</th>
+							<th class="text-center">SKU to Sales Ratio</th>
+							<th colspan="8"></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for record in object.weeklyitemsavg_set.all %}
+						<tr>
+							<td>{{record.item.name}}</td>
+							<td class="text-center">{{record.avg|floatformat:2}}</td>
+							<td class="text-center">{{record.ratio|floatformat:4}}</td>
+							<td class="text-center">{{record.wed|floatformat:2}}</td>
+							<td class="text-center">{{record.thu|floatformat:2}}</td>
+							<td class="text-center">{{record.fri|floatformat:2}}</td>
+							<td class="text-center">{{record.sat|floatformat:2}}</td>
+							<td class="text-center">{{record.sun|floatformat:2}}</td>
+							<td class="text-center">{{record.mon|floatformat:2}}</td>
+							<td class="text-center">{{record.tue|floatformat:2}}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+					<tfoot>
+						<tr>
+							<td></td>
+							<th class="text-center">{{object.total_avg|floatformat:2}}</th>
+							<th class="text-center">{{object.total_ratio|floatformat:4}}</th>
+							<td class="text-center" colspan="8"></td>
+						</tr>
+					</tfoot>
+					</table>
+				</div>
+				<!-- /.card-body -->
+				</div>
+				<!-- /.card -->
+			</div>
+		</div>
+		{% else %}
+
+			{% if statistics_Post %}
+
+				<div class="row">
+					<div class="col-12">
+						<div class="card">
+							<div class="card-body">
+								<div class="alert alert-danger">Data not found</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+			{% endif %}
+
+		{% endif %}
+
+	</div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+	  
+
+{% endblock  %}

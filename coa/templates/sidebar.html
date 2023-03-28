@@ -1,0 +1,101 @@
+{% load static %}
+
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="{% url 'dashboard' %}" class="brand-link">
+      <img src="{% static 'logo.png' %}" alt="CAO Admin" class="brand-image elevation-3" style="opacity: .8">
+      <span class="brand-text font-weight-light">XENA</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="image">
+          <img src="{% static 'dist/img/avatar.png' %}" class="img-circle elevation-2" alt="User Image">
+        </div>
+        <div class="info">
+          <a href="" class="d-block">{{request.user.username}}</a>
+        </div>
+      </div>
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <li class="nav-item">
+            <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.view_name == 'dashboard'%}active{% endif %}">
+              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <p>
+                Dashboard
+              </p>
+            </a>
+          </li>
+          
+          <li class="nav-item">
+              <a href="{% url 'store' %}" class="nav-link {% if request.resolver_match.view_name == 'store'%}active{% endif %}">
+                <i class="nav-icon fas fa-edit"></i>
+                <p>Store Information</p>
+              </a>
+          </li>
+
+          
+          <li class="nav-item">
+            <a href="{% url 'item_list'%}" class="nav-link {% if request.resolver_match.view_name == 'item_list'%}active{% endif %}">
+              <i class="nav-icon fas fa-list"></i>
+              <p>Items</p>
+            </a>
+          </li>
+        
+          <li class="nav-item">
+            <a href="{% url 'sales_list' %}" class="nav-link {% if request.resolver_match.view_name == 'sales_list'%}active{% endif %}">
+              <i class="nav-icon fas fa-bars"></i>
+              <p>Sales Data</p>
+            </a>
+          </li>
+          
+          <li class="nav-item has-treeview {% if request.resolver_match.view_name == 'prediction' or request.resolver_match.view_name == 'statistics' or request.resolver_match.view_name == 'order_history'%} menu-open {% endif %}">
+            <a href="#" class="nav-link {% if request.resolver_match.view_name == 'prediction' or request.resolver_match.view_name == 'statistics' or request.resolver_match.view_name == 'order_history'%} active {% endif %}">
+              <i class="nav-icon fa fa-list"></i>
+              <p>
+                Order
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+
+              <li class="nav-item">
+                <a href="{% url 'statistics' %}" class="nav-link {% if request.resolver_match.view_name == 'statistics'%}active{% endif %}">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Weekly Sales Outlook</p>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a href="{% url 'prediction' %}" class="nav-link {% if request.resolver_match.view_name == 'prediction'%}active{% endif %}">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Generate Order</p>
+                </a>
+              </li>
+              
+              <li class="nav-item">
+                <a href="{% url 'order_history' %}" class="nav-link {% if request.resolver_match.view_name == 'order_history'%}active{% endif %}">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Place Order</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+        
+          <li class="nav-item">
+            <a href="{% url 'logout' %}" class="nav-link">
+              <i class="nav-icon fas fa-power-off"></i>
+              <p>Logout</p>
+            </a>
+          </li>
+
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>

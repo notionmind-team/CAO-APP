@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Place Order{% endblock %}
+
+{% block pagetitle %}Place Order{% endblock %}
+
+{% block breadcrumbs %}
+	{{ block.super }}
+	<li class="breadcrumb-item active">Place Order</li>
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<section class="content">
+	<div class="container-fluid">
+		{% if messages %}
+			{% for message in messages %}
+				{% if message.tags == 'error' %}
+				<div class="alert alert-danger">{{ message|safe }}</div><br/>
+				{% else%}
+				<div class="alert {% if message.tags %} alert-{{ message.tags }}{% endif %}">{{ message|safe }}</div><br/>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+
+		<div class="row">
+				<div class="col-12">
+		<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Filter</h3>
+					<div class="card-tools">
+						<button type="button" class="btn btn-tool btn-sm" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+						  <i class="fas fa-minus"></i></button>
+					</div>
+				</div>
+				<!-- /.card-header -->
+				<div class="card-body">
+					<form role="form" method="POST" id="filter_item_form">
+					{% csrf_token %}
+					<div class="row">
+						<div class="col-sm-3">
+							<!-- select -->
+							<div class="form-group">
+								<label>Category</label>
+								<select class="custom-select" name="category" id="id_category">
+								<option value="">-- Select Category --</option>
+								{% for cat in categories%}
+									<option value="{{cat.id}}" {% if order_Post.category|slugify == cat.id|slugify %} selected {% endif %}>{{cat.name}}</option>
+								{% endfor %}
+								</select>
+							</div>
+						</div>
+						<div class="col-sm-3">
+							<div class="form-group">
+								<label>Sub Category</label>
+								<select class="custom-select" name="subcategory" id="id_subcategory">
+								<option value="">-- Select Sub Category --</option>
+								{% for sub in subcategories %}
+									<option value="{{sub.id}}" {% if order_Post.subcategory|slugify == sub.id|slugify %} selected {% endif %}>{{sub.name}}</option>
+								{% endfor %}
+								</select>
+							</div>
+						</div>
+						<div class="col-sm-3">
+							<div class="form-group">
+								<label>Supplier</label>
+								<select class="custom-select" name="supplier" id="id_supplier">
+								<option value="">-- Select Supplier --</option>
+								{% for supplier in suppliers %}
+									<option value="{{supplier.id}}" {% if order_Post.supplier|slugify == supplier.id|slugify %} selected {% endif %}>{{supplier.name}}</option>
+								{% endfor %}
+								</select>
+							</div>
+						</div>
+						<div class="col-sm-3">
+							<div class="form-group" style="margin-top:30px;">
+								<button type="button" class="btn btn-info" onclick="ItemFormSeach('search');">Search</button>
+								<button type="button" class="btn btn-default" onclick="ItemFormSeach('clear');">Clear</button>
+								<input type="hidden" name="search_action" id="search_action" value="search">
+							</div>
+						</div>
+					</div>
+				</form>
+				</div>
+				<!-- /.card-body -->
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+					<div class="card-header">
+						<h3 class="card-title">Order Listing</h3> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<div class="btn-group" id="action_btn" style="display:none">
+							<button type="button" class="btn btn-default">Action</button>
+							<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+							</button>
+							<ul class="dropdown-menu">
+								<li><a class="dropdown-item"  href="javascript:ActionPlaceOrder('delete')">Placed Selected Orders</a></li>
+							</ul>
+						</div>
+						<div class="card-tools">
+							<a href="{% url 'order_add_new' %}" class="btn btn-block btn-primary"><i class="fas fa-plus"></i> &nbsp Create Adhoc Order</a>
+					   </div>
+					</div>
+					<!-- /.card-header -->
+					{% if object_list %}
+					<div class="card-body table-responsive">
+						<form method="POST" id="form_list" action="{% url 'change_order_status' %}">
+							{% csrf_token %}
+							<table id="item_list" class="table table-bordered table-striped">
+								<thead>
+								<tr class="bg-primary">
+									<th class="text-center"><input type="checkbox" name="chk_all" id="chk_all" value="all"></th>
+									<th >Category</th>
+									<th >Sub Category</th>
+									<th class="text-center">Placed</th>
+									<th class="text-center">Type</th>
+									<th class="text-center">Date & Time</th>
+									<th class="text-center">Action</th>
+								</tr>
+								</thead>
+								<tbody>
+									{% for order in object_list %}
+										<tr>
+											<td class="text-center">
+												<input type="checkbox" id="id_{{order.token}}" name="records" class="chk" value="{{order.token}}">
+											</td>
+
+											<td >{{order.category}}</td>
+											<td >{{order.subcategory}}</td>
+											<td class="text-center"> 
+												{% if order.is_placed %}
+													<button type="button" class="btn btn-success btn-sm"><i class="fas fa-check"></i></button>
+												{% else %}
+													<button type="button" class="btn btn-danger btn-sm"><i class="fas fa-times"></i></button>
+												{% endif %}
+											</td>
+											<td class="text-center">
+												{% if order.order_type == 'Custom'%}
+													Adhoc
+												{% else %}
+													Predicated
+												{% endif %}
+											</td> 
+											<td class="text-center">{{order.createdAt}}</td>
+											<td class="text-center">
+												<a href="{% url 'order_view' order.token %}" class="btn btn-sm btn-secondary" title="View"><i class="fas fa-eye"></i> View</a>
+												<a href="{% url 'order_download' order.token %}" class="btn btn-sm btn-primary" title="View"><i class="fas fa-download"></i> Download</a>
+											</td>
+										</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+							<input type="hidden" name="action_on" id="action_on">
+						</form>
+					</div>
+					<!-- /.card-body -->
+					<div class="card-footer clearfix">
+
+							{% if object_list.has_other_pages %}
+							<ul class="pagination pagination-sm m-0 float-right">
+								{% if object_list.has_previous %}
+								<li class="page-item"><a class="page-link" href="?page={{ object_list.previous_page_number }}">&laquo;</a></li>
+								{% else %}
+								<li class="page-item disabled"><a class="page-link" href="#">&laquo;</a></li>
+								{% endif %}
+								{% for i in object_list.paginator.page_range %}
+								{% if object_list.number == i %}
+									<li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+								{% else %}
+									<li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+								{% endif %}
+								{% endfor %}
+								{% if object_list.has_next %}
+								<li class="page-item"><a class="page-link" href="?page={{ object_list.next_page_number }}">&raquo;</a></li>
+								{% else %}
+								<li class="page-item disabled"><a class="page-link" href="#">&raquo;</a></li>
+								{% endif %}
+							</ul>
+							{% endif %}
+					</div>
+					{% else %}
+						<div class="card-body">
+							<div class="alert alert-danger">order(s) not found</div>
+						</div>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+{% endblock  %}

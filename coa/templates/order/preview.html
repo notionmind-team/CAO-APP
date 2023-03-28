@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Order Preview{% endblock %}
+
+{% block pagetitle %}Order Preview{% endblock %}
+
+{% block breadcrumbs %}
+	{{ block.super }}
+	<li class="breadcrumb-item"><a href="{% url 'prediction' %}">Generate Order</a></li>
+	<li class="breadcrumb-item active">Order Preview</li> 
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+<!-- Main content -->
+<section class="content">
+	<div class="container-fluid">
+
+			<div class="row">
+					<div class="col-12">
+					  <!-- Main content -->
+					  <div class="invoice p-3 mb-3">
+						<!-- title row -->
+						<div class="row">
+						  <div class="col-12">
+							<h4>
+							  {{object.store.name}}, {{object.store.address}}, {{object.store.city}}, {{object.store.state}} {{object.store.zipcode}}
+							  <small class="float-right">Date : {% now "m/d/Y" %}</small>
+							</h4>
+						  </div>
+						  <!-- /.col -->
+						</div>
+						<!-- info row -->
+						<div class="row invoice-info">
+								
+							<div class="col-sm-6 invoice-col">
+									<br/>
+									<b>Category :</b> {{object.category.name}}<br/>
+									<b>Sub Category :</b> {{object.subcategory.name}}<br/><br/>
+                </div>
+                <!-- /.col -->
+              </div>
+						<!-- /.row -->
+		  
+						<!-- Table row -->
+						<div class="row">
+						  <div class="col-12 table-responsive">
+									<form method="POST" action="{% url 'order_place'%}" id="place-order-form">
+										{% csrf_token %}
+										<table class="table table-striped">
+											<thead>
+											<tr class="bg-primary">
+											<th>Image</th>
+											<th>SKU ID</th>
+											<th>SKU Name</th>
+											<th class="text-center">Supplier</th>
+											<th class="text-center">Quantity required</th>
+											<th class="text-center">On Hand Quantity</th>
+											<th class="text-center">Order</th>
+											</tr>
+											</thead>
+											<tbody>
+												{% for record in items %}
+												<tr>
+													<td>
+														{% if record.item_info.image %}
+															<img class="product-image" src="{{record.item_info.image.url}}" style="width:50px; height:50px;">
+														{% else %}
+															<img class="product-image" src="{% static 'no-image.jpg' %}" style="width:50px; height:50px;">
+														{% endif %}
+													</td>
+													<td>{{record.item_info.sku}}</td>
+													<td>{{record.item_info.name}}</td>
+													<td class="text-center">{% if record.item_info.supplier %}{{record.item_info.supplier}}{% else %}-{% endif %}</td>
+													<td class="text-center">{{record.order_quantity}}</td>
+													<td class="text-center">{{record.on_hand_quanty}}</td>
+													<td class="text-center">{{record.order}}</td>
+												</tr>
+												{% endfor %}
+											</tbody>
+										</table>
+									</form>
+						  </div>
+						  <!-- /.col -->
+						</div>
+						
+						
+						<!-- this row will not appear when printing -->
+						<div class="row no-print">
+						  	<div class="col-12">
+								<button type="button" class="btn btn-success float-right" onclick="placeOrder()">Generate Order</button>
+								<a href="{% url 'prediction' %}" class="btn btn-default float-right" style="margin-right: 5px;">Back</a>
+							</div>
+						</div>
+					  </div>
+					  <!-- /.invoice -->
+					</div><!-- /.col -->
+				  </div><!-- /.row -->
+
+		
+	</div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+	  
+
+{% endblock  %}

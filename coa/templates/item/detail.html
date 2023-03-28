@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}View Item{% endblock %}
+
+{% block pagetitle %}View Item{% endblock %}
+
+{% block breadcrumbs %}
+	{{ block.super }}
+    <li class="breadcrumb-item"><a href="{% url 'item_list' %}">Item Listing</a></li>
+    <li class="breadcrumb-item active">View Item</li>
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+<!-- Main content -->
+<section class="content">
+
+    <!-- Default box -->
+    <div class="card card-solid">
+      <div class="card-body">
+        <div class="row">
+
+          <div class="col-12 col-sm-6">
+            <h3 class="d-inline-block d-sm-none">{{object.name}}</h3>
+            <div class="col-12">
+              {% if object.image %}
+                <img class="product-image" src="{{object.image.url}}">
+              {% else %}
+                <img class="product-image" src="{% static 'no-image.jpg' %}">
+              {% endif %}
+            </div>
+          </div> 
+
+          <div class="col-12 col-sm-6">
+            <h3 class="my-3">{{object.name}}</h3>
+            <hr>
+            
+            <h4>SKU</h4>
+            <p>{{object.sku}}</p>
+
+            <h4>Unit Pricing</h4>
+            <p>{{object.price}}</p>
+
+            <h4>MOQ</h4>
+            <p>{{object.moq}}</p>
+
+            <h4>Unit of Measurement</h4>
+            <p>{{object.get_uom_display}}</p>
+
+            <h4>Category</h4>
+            <p>{{object.category}}</p>
+
+            <h4>Sub Category</h4>
+            <p>{{object.subcategory}}</p>
+
+            <h4>Supplier</h4>
+            <p>{{object.supplier}}</p>
+            
+          </div>
+        </div>
+      </div>
+      <!-- /.card-body -->
+    </div>
+    <!-- /.card -->
+
+  </section>
+{% endblock  %}
