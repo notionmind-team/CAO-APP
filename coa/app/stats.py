@@ -83,56 +83,55 @@ def generate_statistics(store,category,sub_category):
     ws.save()
     
     for row in day_wise_item_wise_quan_avg_ratio.itertuples():
-        if row.sku_id is not math.nan:
-            try:
-                ration           =  sku_to_sales_ratio[sku]
-            except:
-                continue
-            sku              =  row.sku_id
-            avg              =  row.item_wise_quan_avg
+        try:
             ration           =  sku_to_sales_ratio[sku]
-            wia              =  WeeklyItemsAvg()
-            wia.salesweek    =  ws
-            wia.item         =  Item.objects.filter(store=store, category=category, subcategory=sub_category, sku=sku).first()
-            wia.avg          =  avg
-            wia.ratio        =  ration
-            
-            try:
-                wia.mon = row.Mon
-            except Exception as e:
-                wia.mon = 0
-            
-            try:
-                wia.tue = row.Tue
-            except Exception as e:
-                wia.tue = 0
-            
-            try:
-                wia.wed = row.Wed
-            except Exception as e:
-                wia.wed = 0
-            
-            try:
-                wia.thu = row.Thr
-            except Exception as e:
-                wia.thu = 0
-            
-            try:
-                wia.fri = row.Fri
-            except Exception as e:
-                wia.fri = 0
-            
-            try:
-                wia.sat  = row.Sat
-            except Exception as e:
-                wia.sat = 0
-            
-            try:
-                wia.sun  = row.Sun
-            except Exception as e:
-                wia.sun = 0
-            
-            wia.save()
+        except:
+            continue
+        sku              =  row.sku_id
+        avg              =  row.item_wise_quan_avg
+        ration           =  sku_to_sales_ratio[sku]
+        wia              =  WeeklyItemsAvg()
+        wia.salesweek    =  ws
+        wia.item         =  Item.objects.filter(store=store, category=category, subcategory=sub_category, sku=sku).first()
+        wia.avg          =  avg
+        wia.ratio        =  ration
+        
+        try:
+            wia.mon = row.Mon
+        except Exception as e:
+            wia.mon = 0
+        
+        try:
+            wia.tue = row.Tue
+        except Exception as e:
+            wia.tue = 0
+        
+        try:
+            wia.wed = row.Wed
+        except Exception as e:
+            wia.wed = 0
+        
+        try:
+            wia.thu = row.Thr
+        except Exception as e:
+            wia.thu = 0
+        
+        try:
+            wia.fri = row.Fri
+        except Exception as e:
+            wia.fri = 0
+        
+        try:
+            wia.sat  = row.Sat
+        except Exception as e:
+            wia.sat = 0
+        
+        try:
+            wia.sun  = row.Sun
+        except Exception as e:
+            wia.sun = 0
+        
+        wia.save()
     
     return True
    
