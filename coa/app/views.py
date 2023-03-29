@@ -603,7 +603,8 @@ def generate_store_prediction_data(request):
         return redirect('/statistics')
 
     except Exception as e:
-        
+            print("error => ",e)
+
             db_logger.exception(e)
             messages.error(request,"Error Computing Sales Prediction. Kindly verify the Sales Data")
             return redirect('/statistics')

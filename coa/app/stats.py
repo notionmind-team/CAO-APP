@@ -25,20 +25,20 @@ def generate_statistics(store,category,sub_category):
         
     pd_w1 = pd.DataFrame(data_w1.values('item__sku','item__name','quantity','revenue','updatedOn'))
     if len(data_w1)>0:    
-        pd_w1.updatedOn = pd.to_datetime(pd_w1.updatedOn)
-        pd_w1['week'] = pd_w1.updatedOn.dt.weekofyear
+        pd_w1.updatedOn = pd.to_datetime(pd_w1.updatedOn,format='%Y-%m-%d')
+        pd_w1['week'] = pd_w1.updatedOn.dt.isocalendar().week
         pd_w1['day'] = pd_w1.updatedOn.dt.dayofweek
 
     pd_w2 = pd.DataFrame(data_w2.values('item__sku','item__name','quantity','revenue','updatedOn'))
     if len(data_w2)>0:
-        pd_w2.updatedOn = pd.to_datetime(pd_w2.updatedOn)
-        pd_w2['week'] = pd_w2.updatedOn.dt.weekofyear
+        pd_w2.updatedOn = pd.to_datetime(pd_w2.updatedOn,format='%Y-%m-%d')
+        pd_w2['week'] = pd_w2.updatedOn.dt.isocalendar().week
         pd_w2['day'] = pd_w2.updatedOn.dt.dayofweek
 
     pd_w3 = pd.DataFrame(data_w3.values('item__sku','item__name','quantity','revenue','updatedOn'))
     if len(data_w3)>0:
-        pd_w3.updatedOn = pd.to_datetime(pd_w3.updatedOn)
-        pd_w3['week'] = pd_w3.updatedOn.dt.weekofyear
+        pd_w3.updatedOn = pd.to_datetime(pd_w3.updatedOn,format='%Y-%m-%d')
+        pd_w3['week'] = pd_w3.updatedOn.dt.isocalendar().week
         pd_w3['day'] = pd_w3.updatedOn.dt.dayofweek
 
     pd_all = pd.concat([pd_w1,pd_w2,pd_w3],sort=False)
@@ -81,55 +81,61 @@ def generate_statistics(store,category,sub_category):
     
     ws.tot = tot_weekly_sale_avg
     ws.save()
-
+    
     for row in day_wise_item_wise_quan_avg_ratio.itertuples():
-        sku              =  row.sku_id
-        avg              =  row.item_wise_quan_avg
-        ration           =  sku_to_sales_ratio[sku]
-        wia              =  WeeklyItemsAvg()
-        wia.salesweek    =  ws
-        wia.item         =  Item.objects.filter(store=store, category=category, subcategory=sub_category, sku=sku).first()
-        wia.avg          =  avg
-        wia.ratio        =  ration
-        
-        try:
-            wia.mon = row.Mon
-        except Exception as e:
-            wia.mon = 0
-        
-        try:
-            wia.tue = row.Tue
-        except Exception as e:
-            wia.tue = 0
-        
-        try:
-            wia.wed = row.Wed
-        except Exception as e:
-            wia.wed = 0
-        
-        try:
-            wia.thu = row.Thr
-        except Exception as e:
-            wia.thu = 0
-        
-        try:
-            wia.fri = row.Fri
-        except Exception as e:
-            wia.fri = 0
-        
-        try:
-            wia.sat  = row.Sat
-        except Exception as e:
-            wia.sat = 0
-        
-        try:
-            wia.sun  = row.Sun
-        except Exception as e:
-            wia.sun = 0
-        
-        wia.save()
+        if row.sku_id is not math.nan:
+            try:
+                ration           =  sku_to_sales_ratio[sku]
+            except:
+                continue
+            sku              =  row.sku_id
+            avg              =  row.item_wise_quan_avg
+            ration           =  sku_to_sales_ratio[sku]
+            wia              =  WeeklyItemsAvg()
+            wia.salesweek    =  ws
+            wia.item         =  Item.objects.filter(store=store, category=category, subcategory=sub_category, sku=sku).first()
+            wia.avg          =  avg
+            wia.ratio        =  ration
+            
+            try:
+                wia.mon = row.Mon
+            except Exception as e:
+                wia.mon = 0
+            
+            try:
+                wia.tue = row.Tue
+            except Exception as e:
+                wia.tue = 0
+            
+            try:
+                wia.wed = row.Wed
+            except Exception as e:
+                wia.wed = 0
+            
+            try:
+                wia.thu = row.Thr
+            except Exception as e:
+                wia.thu = 0
+            
+            try:
+                wia.fri = row.Fri
+            except Exception as e:
+                wia.fri = 0
+            
+            try:
+                wia.sat  = row.Sat
+            except Exception as e:
+                wia.sat = 0
+            
+            try:
+                wia.sun  = row.Sun
+            except Exception as e:
+                wia.sun = 0
+            
+            wia.save()
     
     return True
+   
 
 #generate charts
 def generate_charts(store):
@@ -154,13 +160,13 @@ def generate_charts(store):
     pd_w1 = pd.DataFrame(data_w1.values('item__sku','item__name','quantity','revenue','updatedOn'))
     if len(data_w1)>0:    
         pd_w1.updatedOn = pd.to_datetime(pd_w1.updatedOn)
-        pd_w1['week'] = pd_w1.updatedOn.dt.weekofyear
+        pd_w1['week'] = pd_w1.updatedOn.dt.isocalendar().week
         pd_w1['day'] = pd_w1.updatedOn.dt.dayofweek
 
     pd_w2 = pd.DataFrame(data_w2.values('item__sku','item__name','quantity','revenue','updatedOn'))
     if len(data_w2)>0:
         pd_w2.updatedOn = pd.to_datetime(pd_w2.updatedOn)
-        pd_w2['week'] = pd_w2.updatedOn.dt.weekofyear
+        pd_w2['week'] = pd_w2.updatedOn.dt.isocalendar().week
         pd_w2['day'] = pd_w2.updatedOn.dt.dayofweek
 
     #pd_w3 = pd.DataFrame(data_w3.values('item__sku','item__name','quantity','revenue','updatedOn'))
@@ -174,7 +180,7 @@ def generate_charts(store):
     pd_this_week_all_data = pd.DataFrame(this_week_all_data.values('item__sku','item__name','item__category__name','item__subcategory__name','quantity','revenue','updatedOn'))
     if len(pd_this_week_all_data)>0:
         pd_this_week_all_data.updatedOn = pd.to_datetime(pd_this_week_all_data.updatedOn)
-        pd_this_week_all_data['week'] = pd_this_week_all_data.updatedOn.dt.weekofyear
+        pd_this_week_all_data['week'] = pd_this_week_all_data.updatedOn.dt.isocalendar().week
         pd_this_week_all_data['day'] = pd_this_week_all_data.updatedOn.dt.dayofweek
 
     #day_wise_item_wise_quan_avg = pd_all.quantity.groupby([pd_all.item__sku,pd_all.day]).sum()/no_of_week  
